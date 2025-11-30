@@ -106,7 +106,7 @@ Expected:
 ## 🧪 Running the Tests
 You can execute the automated tests with pytest from inside the container.
 ```bash
-podman exec -it user-registration-api-app-1 sh -c "pytest -q"
+podman exec -it user-registration-api-app-1 sh -c "cd /app && PYTHONPATH=/app pytest -q"
 ```
 
 ## 📦 Requirements

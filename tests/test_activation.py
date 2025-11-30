@@ -1,3 +1,4 @@
+import bcrypt
 from fastapi.testclient import TestClient
 from datetime import datetime, timedelta
 from app.main import app
@@ -5,30 +6,45 @@ from app.db.connection import get_connection
 
 client = TestClient(app)
 
-
 def create_user_for_test():
     """Helper function to insert a user + activation code directly in DB."""
     email = "activation@test.com"
     password = "Secret123"
 
+    # Hash the password exactly like the application does
+    hashed = bcrypt.hashpw(password.encode(), bcrypt.gensalt()).decode()
+
     conn = get_connection()
     with conn:
         with conn.cursor() as cur:
+            # Clean previous test data
+            cur.execute(
+                "DELETE FROM activation_codes WHERE user_id IN (SELECT id FROM users WHERE email=%s)",
+                (email,),
+            )
             cur.execute("DELETE FROM users WHERE email=%s", (email,))
-            cur.execute("""
+
+            # Insert user with bcrypt hash
+            cur.execute(
+                """
                 INSERT INTO users (email, password_hash)
-                VALUES (%s, crypt(%s, gen_salt('bf')))
+                VALUES (%s, %s)
                 RETURNING id
-            """, (email, password))
+                """,
+                (email, hashed),
+            )
             user_id = cur.fetchone()[0]
 
-            cur.execute("""
+            # Insert a valid activation code (4 digits) with 1 minute expiry
+            cur.execute(
+                """
                 INSERT INTO activation_codes (user_id, code, expires_at)
                 VALUES (%s, %s, %s)
-            """, (user_id, "1234", datetime.utcnow() + timedelta(minutes=1)))
+                """,
+                (user_id, "1234", datetime.utcnow() + timedelta(minutes=1)),
+            )
 
     return email, password, "1234"
-
 
 def test_activation_success():
     email, password, code = create_user_for_test()
