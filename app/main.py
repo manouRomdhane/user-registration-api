@@ -1,5 +1,7 @@
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
+from app.api.routes import users
+
 
 def create_app() -> FastAPI:
     """
@@ -18,6 +20,9 @@ def create_app() -> FastAPI:
         allow_methods=["*"],
         allow_headers=["*"],
     )
+
+    # Register all routers
+    app.include_router(users.router)
 
     # Optional: health check endpoint
     @app.get("/health", tags=["system"])
