@@ -1,0 +1,14 @@
+CREATE TABLE IF NOT EXISTS users (
+    id SERIAL PRIMARY KEY,
+    email VARCHAR(255) UNIQUE NOT NULL,
+    password_hash VARCHAR(255) NOT NULL,
+    is_active BOOLEAN DEFAULT FALSE,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
+
+CREATE TABLE IF NOT EXISTS activation_codes(
+    user_id INT REFERENCES users(id) ON DELETE CASCADE,
+    code VARCHAR(4) NOT NULL,
+    expires_at TIMESTAMP NOT NULL,
+    PRIMARY KEY (user_id)
+);
