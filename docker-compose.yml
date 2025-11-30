@@ -7,10 +7,12 @@ services:
       DB_NAME: registration
       DB_USER: user
       DB_PASSWORD: password
+      EMAIL_API_URL: http://email-mock/send
     ports:
     - "8000:8000"
     depends_on:
     - db
+    - email-mock
 
   db:
     image: postgres:14
@@ -22,3 +24,12 @@ services:
     - "5432:5432"
     volumes:
     - ./db-init:/docker-entrypoint-initdb.d
+
+  email-mock:
+    image: python:3.11-slim
+    working_dir: /srv
+    command: ["python","server.py"]
+    volumes:
+    - ./email-mock:/srv
+    ports:
+    - "3001:3001"
