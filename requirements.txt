@@ -1,0 +1,10 @@
+fastapi
+uvicorn
+email-validator
+pydantic[email]
+psycopg2-binary
+bcrypt
+pytest
+httpx
+pytest-asyncio
+python-dotenv
