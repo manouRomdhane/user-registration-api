@@ -4,6 +4,9 @@ from datetime import datetime, timedelta
 from psycopg2.errors import UniqueViolation
 
 from app.db.connection import get_connection
+from app.services.email_service import send_activation_email
+from app.utils.logging import logger, redact_email
+
 
 class ConflictError(Exception):
     """Raised when trying to create a user that already exists (email unique constraint)."""
@@ -60,6 +63,20 @@ def create_user(email: str, password: str) -> None:
                     (user_id, code, expires),
                 )
 
+                # Call the third-party email service (HTTP API, mocked in this project).
+                ok = send_activation_email(email, code)
+                if not ok:
+                    # The third-party is optional: user creation still succeeds,
+                    # but we log a warning and print the code for debugging.
+                    logger.warning(
+                        f"Email Service unavailable for {redact_email(email)}; "
+                        "activation code printed to stdout."
+                    )
+
+                # Always print the code in console (allowed by the requirements).
+                print(f"[MOCK EMAIL] Activation code for {redact_email(email)}: {code}")
+                logger.info(f"User created {redact_email(email)}")
+
         # If we reach here, the transaction has been committed successfully.
 
     except UniqueViolation:
@@ -106,16 +123,19 @@ def activate_user(email: str, password: str, code: str) -> bool:
                 row = cur.fetchone()
                 if not row:
                     # Email not found.
+                    logger.info(f"Activation failed: unknown user {redact_email(email)}")
                     return False
 
                 user_id, hashed, is_active = row
 
                 # 2) If already active, we consider this a success (idempotent).
                 if is_active:
+                    logger.info(f"Activation skipped: user already active {redact_email(email)}")
                     return True
 
                 # 3) Check password using bcrypt.
                 if not bcrypt.checkpw(password.encode(), hashed.encode()):
+                    logger.info(f"Activation failed: invalid password for {redact_email(email)}")
                     return False
 
                 # 4) Fetch activation code row for this user.
@@ -127,6 +147,7 @@ def activate_user(email: str, password: str, code: str) -> bool:
                 ac_row = cur.fetchone()
                 if not ac_row:
                     # No activation code found (should not happen in normal flow).
+                    logger.info(f"Activation failed: no activation code for {redact_email(email)}")
                     return False
 
                 db_code, expires = ac_row
@@ -135,10 +156,12 @@ def activate_user(email: str, password: str, code: str) -> bool:
 
                 # 5) Check whether code matches and is still valid.
                 if db_code != code:
+                    logger.info(f"Activation failed: wrong code for {redact_email(email)}")
                     return False
 
                 if now >= expires:
                     # Code expired (more than 1 minute old).
+                    logger.info(f"Activation failed: code expired for {redact_email(email)}")
                     return False
 
                 # 6) Mark user as active.
@@ -150,6 +173,7 @@ def activate_user(email: str, password: str, code: str) -> bool:
                 # (Optional) Invalidate the activation code so it can't be reused.
                 # cur.execute("DELETE FROM activation_codes WHERE user_id = %s", (user_id,))
 
+                logger.info(f"User activated: {redact_email(email)}")
                 return True
 
     finally:
