@@ -1,0 +1,32 @@
+<main class="page">
+  <section class="panel">
+    <p class="brand">CSV Demo</p>
+    <h1>Créer un fichier CSV vide</h1>
+    <p class="lead">
+      Bouton Angular qui appelle l’API Spring Boot pour générer un fichier CSV vide.
+    </p>
+
+    <label class="field">
+      Nom du fichier
+      <input
+        type="text"
+        [(ngModel)]="fileName"
+        placeholder="empty.csv"
+        [disabled]="isLoading"
+      />
+    </label>
+
+    <div class="actions">
+      <button type="button" class="primary" (click)="downloadEmptyCsv()" [disabled]="isLoading">
+        Télécharger un CSV vide
+      </button>
+      <button type="button" class="secondary" (click)="createEmptyCsvOnServer()" [disabled]="isLoading">
+        Créer sur le serveur
+      </button>
+    </div>
+
+    @if (statusMessage) {
+      <p class="status" role="status">{{ statusMessage }}</p>
+    }
+  </section>
+</main>
