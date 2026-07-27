@@ -1,0 +1,22 @@
+<main class="page">
+  <section class="hero">
+    <p class="brand">CSV Blank</p>
+    <h1>Créer un fichier CSV vide</h1>
+    <p class="subtitle">
+      Un CSV blanc nommé avec la date du jour, l'heure et la minute.
+    </p>
+    <button type="button" class="cta" (click)="createCsv()" [disabled]="loading">
+      {{ loading ? 'Création…' : 'Créer un CSV vide' }}
+    </button>
+
+    @if (result) {
+      <p class="success" role="status">
+        {{ result.message }} — <strong>{{ result.fileName }}</strong>
+      </p>
+    }
+
+    @if (error) {
+      <p class="error" role="alert">{{ error }}</p>
+    }
+  </section>
+</main>

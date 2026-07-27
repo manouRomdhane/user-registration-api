@@ -1,0 +1,119 @@
+:root {
+  --ink: #1a2332;
+  --paper: #f7f3ec;
+  --accent: #0f6b5c;
+  --accent-dark: #0a4f44;
+  --muted: #5c6675;
+  --danger: #9b2c2c;
+  --ok: #1b5e3b;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+.page {
+  min-height: 100vh;
+  display: grid;
+  place-items: center;
+  padding: 2rem;
+  background:
+    radial-gradient(circle at 12% 18%, rgba(15, 107, 92, 0.18), transparent 42%),
+    radial-gradient(circle at 88% 78%, rgba(26, 35, 50, 0.12), transparent 45%),
+    linear-gradient(160deg, #eef4f1 0%, var(--paper) 48%, #e6ebe4 100%);
+  color: var(--ink);
+  font-family: "Segoe UI", "Helvetica Neue", sans-serif;
+}
+
+.hero {
+  width: min(100%, 36rem);
+  text-align: center;
+}
+
+.brand {
+  margin: 0 0 0.75rem;
+  font-size: clamp(2.4rem, 7vw, 3.6rem);
+  font-weight: 700;
+  letter-spacing: -0.03em;
+  color: var(--accent);
+  animation: rise 0.7s ease-out both;
+}
+
+h1 {
+  margin: 0 0 0.75rem;
+  font-size: clamp(1.25rem, 3vw, 1.6rem);
+  font-weight: 600;
+  animation: rise 0.7s ease-out 0.1s both;
+}
+
+.subtitle {
+  margin: 0 0 1.75rem;
+  color: var(--muted);
+  line-height: 1.5;
+  animation: rise 0.7s ease-out 0.2s both;
+}
+
+.cta {
+  appearance: none;
+  border: 0;
+  border-radius: 0.5rem;
+  padding: 0.9rem 1.5rem;
+  background: var(--accent);
+  color: #fff;
+  font-size: 1rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background 0.2s ease, transform 0.2s ease;
+  animation: rise 0.7s ease-out 0.3s both;
+}
+
+.cta:hover:not(:disabled) {
+  background: var(--accent-dark);
+  transform: translateY(-1px);
+}
+
+.cta:disabled {
+  opacity: 0.7;
+  cursor: wait;
+}
+
+.success,
+.error {
+  margin: 1.25rem 0 0;
+  line-height: 1.45;
+  animation: fade-in 0.35s ease-out both;
+}
+
+.success {
+  color: var(--ok);
+}
+
+.error {
+  color: var(--danger);
+}
+
+@keyframes rise {
+  from {
+    opacity: 0;
+    transform: translateY(12px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes fade-in {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+@media (max-width: 600px) {
+  .page {
+    padding: 1.25rem;
+  }
+}
